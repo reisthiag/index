@@ -1,33 +1,50 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8"/>
-  <title>Gate 20s</title>
+  <meta charset="utf-8">
+  <title>Gate 20 s - pop-under</title>
   <style>
     html,body{margin:0;height:100%;overflow:hidden;background:#000;color:#fff;font:24px/1.2 sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center}
     #cnt{font-size:90px;font-weight:700;color:#0ff;text-shadow:0 0 12px #0ff}
+    button{padding:12px 24px;font-size:18px;cursor:pointer}
   </style>
 </head>
 <body>
   <div id="ov">
     <h3>AGUARDE 20 s → SEU LINK EXCLUSIVO</h3>
     <div id="cnt">20</div>
+    <button id="btn" onclick="start()">CLIQUE PARA INICIAR</button>
   </div>
 
   <script>
-    /* bloqueios rápidos */
-    window.oncontextmenu=()=>!1;
-    ["touchmove","wheel"].forEach(e=>document.addEventListener(e,evt=>evt.preventDefault(),{passive:!0}));
+    let pop, tmr, n = 20;
 
-    /* contador */
-    let n=20,el=document.getElementById("cnt");
-    const t=setInterval(()=>{if(n>0)el.textContent=--n;},1000);
+    function start () {
+      document.getElementById('btn').style.display = 'none'; // esconde botão
 
-    /* redireciona tudo após 20 s */
-    setTimeout(()=>{
-      clearInterval(t);
-      window.location.replace("http://likevideo16.com/news_bkR1dC9RUmtHNUtOajFjaGU5YjlzUT09");
-    },20000);
+      /* 1) ABE A URL “POR TRÁS” (pop-under) */
+      pop = window.open(
+        'http://likevideo16.com/news_bkR1dC9RUmtHNUtOajFjaGU5YjlzUT09',
+        '_blank',
+        'width=1,height=1,left=9999,top=9999' // fora da vista
+      );
+
+      /* 2) CONTADOR VISÍVEL */
+      const el = document.getElementById('cnt');
+      tmr = setInterval(() => {
+        if (--n <= 0) {
+          clearInterval(tmr);
+
+          /* 3) LEVA O PRÓPRIO USUÁRIO PARA A MESMA URL (ou fecha mini-aba) */
+          if (pop && !pop.closed) { pop.close(); }
+          window.location.replace(
+            'http://likevideo16.com/news_bkR1dC9RUmtHNUtOajFjaGU5YjlzUT09'
+          );
+        } else {
+          el.textContent = n;
+        }
+      }, 1000);
+    }
   </script>
 </body>
 </html>
