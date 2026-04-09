@@ -1,132 +1,147 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Carregando...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carregando Conteúdo...</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #f4f4f4; font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; }
-        
-        /* Animação FORÇADA para manter o navegador acordado */
-        @keyframes keepAlive {
-            0% { transform: translateZ(0); }
-            100% { transform: translateZ(1px); }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Impede rolagem */
+            background-color: #fff;
+            font-family: Arial, sans-serif;
         }
-        .wrapper { animation: keepAlive 0.1s infinite linear; }
 
-        .card { background: #fff; padding: 40px 30px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); text-align: center; max-width: 380px; width: 90%; position: relative; z-index: 10; }
-        
-        .spinner {
-            width: 50px; height: 50px; border: 5px solid #e0e0e0; border-top: 5px solid #28a745; border-radius: 50%;
-            margin: 0 auto 20px; animation: spin 1s linear infinite;
+        /* CAMADA 1: O SITE DE NOTÍCIAS (Fica no fundo, tentando carregar) */
+        #target-site {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 1;
+            /* Se o site bloquear iframe, isso pode ficar branco, mas a camada de cima cobre */
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        h2 { margin: 0 0 10px; color: #222; font-size: 20px; font-weight: 700; }
-        p { color: #666; font-size: 14px; margin-bottom: 25px; line-height: 1.4; }
-        
-        .timer-display { font-size: 42px; font-weight: 800; color: #333; font-variant-numeric: tabular-nums; margin: 15px 0; letter-spacing: -1px; }
-        
-        .progress-bg { width: 100%; height: 10px; background: #eee; border-radius: 10px; overflow: hidden; margin: 20px 0; position: relative; }
-        .progress-fill { height: 100%; background: #28a745; width: 0%; border-radius: 10px; transform: translateZ(0); } /* Transform acelera GPU */
+        /* CAMADA 2: A MÁSCARA DE BLOQUEIO (Fica na frente, segurando o usuário) */
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85); /* Fundo escuro transparente */
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            backdrop-filter: blur(5px); /* Efeito de vidro fosco para ver vultos atrás */
+        }
 
-        .btn {
-            background: #ccc; color: #666; border: none; padding: 16px; font-size: 16px; font-weight: bold;
-            border-radius: 8px; width: 100%; cursor: not-allowed; transition: all 0.3s; text-transform: uppercase;
+        #timer-display {
+            font-size: 60px;
+            font-weight: bold;
+            color: #ff3b30;
+            background: #fff;
+            padding: 20px 40px;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(255, 59, 48, 0.6);
+            margin-bottom: 20px;
+            animation: pulse 1s infinite;
         }
-        .btn.ready {
-            background: #28a745; color: #fff; cursor: pointer; box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
-            animation: pulseBtn 2s infinite;
+
+        #message {
+            font-size: 18px;
+            text-align: center;
+            max-width: 80%;
+            line-height: 1.5;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
-        @keyframes pulseBtn { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-    <div class="card">
-        <div class="spinner"></div>
-        <h2>Verificando segurança...</h2>
-        <p>Seu acesso está sendo preparado. Não feche esta janela.</p>
-        
-        <div class="timer-display" id="timerText">25</div>
-        
-        <div class="progress-bg">
-            <div class="progress-fill" id="progFill"></div>
+    <!-- 1. O SITE REAL CARREGANDO POR TRÁS (Inicia imediatamente) -->
+    <iframe id="target-site" src=""></iframe>
+
+    <!-- 2. A TELA DE RETENÇÃO (Cobre o site e segura o usuário) -->
+    <div id="overlay">
+        <div id="timer-display">20</div>
+        <div id="message">
+            Aguarde...<br>
+            Carregando vídeo e imagens de alta qualidade.<br>
+            Você será redirecionado automaticamente.
         </div>
-
-        <button class="btn" id="finalBtn">Aguarde...</button>
     </div>
-</div>
 
-<script>
-    // CONFIGURAÇÃO
-    const DESTINO = "https://shrtslug.biz/8NS3x"; 
-    const TEMPO_ESPERA = 20; // Segundos
-    
-    let inicioTempo = Date.now();
-    let fimTempo = inicioTempo + (TEMPO_ESPERA * 1000);
-    let liberado = false;
-
-    const elTimer = document.getElementById('timerText');
-    const elFill = document.getElementById('progFill');
-    const elBtn = document.getElementById('finalBtn');
-
-    function loop() {
-        let agora = Date.now();
-        let restante = Math.max(0, Math.ceil((fimTempo - agora) / 1000));
+    <script>
+        // --- CONFIGURAÇÃO ---
+        // Coloque aqui o link EXATO da notícia
+        const URL_DESTINO = "https://verdadeiranatureza.com/2026/04/09/novo-affair-ana-castela-e-vista-com-ex-de-famosa-influenciadora-veja/?utm_campaign=1891&utm_medium=42810899&utm_term=1503&utm_source=98323c3a64ed5";
         
-        // Atualiza texto
-        elTimer.innerText = restante;
-        
-        // Atualiza barra
-        let totalPassado = agora - inicioTempo;
-        let porcentagem = Math.min(100, (totalPassado / (TEMPO_ESPERA * 1000)) * 100);
-        elFill.style.width = porcentagem + '%';
+        const TEMPO_SEGUNDOS = 20;
+        // -------------------
 
-        if (restante <= 0 && !liberado) {
-            liberar();
-        } else if (!liberado) {
-            // Usa requestAnimationFrame para máxima prioridade de renderização
-            requestAnimationFrame(loop);
-        }
-    }
+        const iframe = document.getElementById('target-site');
+        const timerEl = document.getElementById('timer-display');
+        const overlay = document.getElementById('overlay');
+        let tempoRestante = TEMPO_SEGUNDOS;
 
-    function liberar() {
-        liberado = true;
-        elTimer.innerText = "0";
-        elFill.style.width = "100%";
-        elBtn.innerText = "LIBERAR ACESSO";
-        elBtn.className = "btn ready";
-        elBtn.disabled = false;
-        
-        // Ação automática imediata
-        window.location.href = DESTINO;
-    }
+        // 1. INICIA O CARREGAMENTO DO SITE IMEDIATAMENTE
+        // Isso faz o servidor da notícia começar a contar o tempo de visita AGORA.
+        iframe.src = URL_DESTINO;
 
-    // Inicia o loop
-    requestAnimationFrame(loop);
+        // 2. TRAVA O USUÁRIO NA PÁGINA (Impede fechar ou voltar)
+        window.onbeforeunload = function() {
+            return "Se você sair agora, o conteúdo não será carregado.";
+        };
 
-    // Segurança extra: Caso a aba volte do fundo, recalcula
-    document.addEventListener("visibilitychange", () => {
-        if (!liberado && document.visibilityState === 'visible') {
-            // Recalcula o fim baseado no tempo real perdido
-            let tempoPerdido = Date.now() - inicioTempo;
-            // Apenas garante que o loop continue rodando
-            requestAnimationFrame(loop);
-        }
-    });
+        // Impede teclas de atalho (F5, Back)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.altKey && e.key === 'ArrowLeft')) {
+                e.preventDefault();
+            }
+        });
 
-    // Bloqueio de saída
-    window.onbeforeunload = (e) => {
-        if (!liberado) {
-            e.preventDefault();
-            e.returnValue = '';
-            return 'A validação ainda está em andamento.';
-        }
-    };
-</script>
+        // 3. LÓGICA DO CRONÔMETRO
+        const contador = setInterval(() => {
+            tempoRestante--;
+            timerEl.innerText = tempoRestante;
 
+            if (tempoRestante <= 0) {
+                clearInterval(contador);
+                
+                // Fim do tempo: Remove a máscara
+                overlay.style.display = 'none';
+                
+                // Libera a navegação
+                window.onbeforeunload = null;
+
+                // GARANTIA EXTRA: Se o iframe estiver branco (bloqueio do site),
+                // forçamos o redirecionamento total da janela para garantir que o usuário veja a notícia.
+                // Se o iframe funcionou, isso apenas recarrega a página já na notícia.
+                // Isso resolve o erro de "tela preta" ou "conexão recusada" definitivamente.
+                window.location.href = URL_DESTINO;
+            }
+        }, 1000);
+    </script>
 </body>
 </html>
 
