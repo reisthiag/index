@@ -10,12 +10,12 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden; /* Impede rolagem */
+            overflow: hidden;
             background-color: #fff;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* CAMADA 1: O SITE DE NOTÍCIAS (Fica no fundo, tentando carregar) */
+        /* CAMADA 1: O SITE DE NOTÍCIAS (Carrega por trás imediatamente) */
         #target-site {
             position: absolute;
             top: 0;
@@ -24,78 +24,79 @@
             height: 100%;
             border: none;
             z-index: 1;
-            /* Se o site bloquear iframe, isso pode ficar branco, mas a camada de cima cobre */
         }
 
-        /* CAMADA 2: A MÁSCARA DE BLOQUEIO (Fica na frente, segurando o usuário) */
+        /* CAMADA 2: MÁSCARA DE RETENÇÃO (Fica na frente) */
         #overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.85); /* Fundo escuro transparente */
+            background-color: rgba(0, 0, 0, 0.88); /* Fundo escuro */
             z-index: 10;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             color: #fff;
-            backdrop-filter: blur(5px); /* Efeito de vidro fosco para ver vultos atrás */
+            backdrop-filter: blur(8px); /* Efeito vidro fosco */
+        }
+
+        #timer-box {
+            background: #fff;
+            color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(255, 59, 48, 0.4);
+            max-width: 90%;
+            width: 350px;
         }
 
         #timer-display {
-            font-size: 60px;
-            font-weight: bold;
+            font-size: 64px;
+            font-weight: 800;
             color: #ff3b30;
-            background: #fff;
-            padding: 20px 40px;
-            border-radius: 50%;
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 30px rgba(255, 59, 48, 0.6);
-            margin-bottom: 20px;
-            animation: pulse 1s infinite;
+            line-height: 1;
+            margin-bottom: 15px;
         }
 
         #message {
-            font-size: 18px;
-            text-align: center;
-            max-width: 80%;
-            line-height: 1.5;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            font-size: 16px;
+            color: #555;
+            line-height: 1.4;
+            font-weight: 500;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+        .warning-icon {
+            font-size: 24px;
+            color: #ff3b30;
+            margin-bottom: 10px;
+            display: block;
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. O SITE REAL CARREGANDO POR TRÁS (Inicia imediatamente) -->
+    <!-- 1. IFRAME OCULTO (Carrega a notícia nos bastidores) -->
     <iframe id="target-site" src=""></iframe>
 
-    <!-- 2. A TELA DE RETENÇÃO (Cobre o site e segura o usuário) -->
+    <!-- 2. TELA DE BLOQUEIO -->
     <div id="overlay">
-        <div id="timer-display">20</div>
-        <div id="message">
-            Aguarde...<br>
-            Carregando vídeo e imagens de alta qualidade.<br>
-            Você será redirecionado automaticamente.
+        <div id="timer-box">
+            <span class="warning-icon">⚠️ Aguarde</span>
+            <div id="timer-display">20</div>
+            <div id="message">
+                Carregando mídia segura...<br>
+                Não feche esta janela ou o conteúdo será perdido.
+            </div>
         </div>
     </div>
 
     <script>
         // --- CONFIGURAÇÃO ---
-        // Coloque aqui o link EXATO da notícia
         const URL_DESTINO = "https://verdadeiranatureza.com/2026/04/09/novo-affair-ana-castela-e-vista-com-ex-de-famosa-influenciadora-veja/?utm_campaign=1891&utm_medium=42810899&utm_term=1503&utm_source=98323c3a64ed5";
-        
         const TEMPO_SEGUNDOS = 20;
         // -------------------
 
@@ -103,47 +104,60 @@
         const timerEl = document.getElementById('timer-display');
         const overlay = document.getElementById('overlay');
         let tempoRestante = TEMPO_SEGUNDOS;
+        let liberado = false;
 
-        // 1. INICIA O CARREGAMENTO DO SITE IMEDIATAMENTE
-        // Isso faz o servidor da notícia começar a contar o tempo de visita AGORA.
+        // 1. INICIA CARREGAMENTO IMEDIATO (Gera engajamento no servidor de destino)
         iframe.src = URL_DESTINO;
 
-        // 2. TRAVA O USUÁRIO NA PÁGINA (Impede fechar ou voltar)
-        window.onbeforeunload = function() {
-            return "Se você sair agora, o conteúdo não será carregado.";
+        // 2. TRAVA DE SAÍDA (O "PULO DO GATO" QUE VOCÊ PEDIU)
+        // Isso força o alerta nativo do navegador ao clicar no X ou tentar fechar a aba
+        window.onbeforeunload = function(e) {
+            if (!liberado) {
+                // Navegadores modernos ignoram o texto customizado e mostram o padrão:
+                // "As alterações que você fez podem não ser salvas. Deseja sair?"
+                // Mas a função de bloquear o fechamento funciona.
+                e.preventDefault(); 
+                e.returnValue = '';
+                return '';
+            }
         };
 
-        // Impede teclas de atalho (F5, Back)
+        // Impede teclas de atalho (F5, Back, Alt+F4 em alguns casos)
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.altKey && e.key === 'ArrowLeft')) {
-                e.preventDefault();
+            if (!liberado) {
+                if (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.altKey && e.key === 'ArrowLeft')) {
+                    e.preventDefault();
+                }
             }
         });
 
-        // 3. LÓGICA DO CRONÔMETRO
+        // 3. CRONÔMETRO
         const contador = setInterval(() => {
             tempoRestante--;
             timerEl.innerText = tempoRestante;
 
             if (tempoRestante <= 0) {
                 clearInterval(contador);
+                liberado = true; // Libera a saída
                 
-                // Fim do tempo: Remove a máscara
-                overlay.style.display = 'none';
-                
-                // Libera a navegação
+                // Remove a trava de fechamento
                 window.onbeforeunload = null;
 
-                // GARANTIA EXTRA: Se o iframe estiver branco (bloqueio do site),
-                // forçamos o redirecionamento total da janela para garantir que o usuário veja a notícia.
-                // Se o iframe funcionou, isso apenas recarrega a página já na notícia.
-                // Isso resolve o erro de "tela preta" ou "conexão recusada" definitivamente.
-                window.location.href = URL_DESTINO;
+                // Remove a máscara visualmente
+                overlay.style.opacity = '0';
+                overlay.style.transition = 'opacity 0.5s ease';
+                
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    // Força redirecionamento final para garantir que o site apareça limpo
+                    window.location.href = URL_DESTINO;
+                }, 500);
             }
         }, 1000);
     </script>
 </body>
 </html>
+
 
 
 
