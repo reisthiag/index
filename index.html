@@ -3,158 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carregando Conteúdo...</title>
+    <title>Verificação de Segurança</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #fff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        /* CAMADA 1: O SITE DE NOTÍCIAS (Carrega por trás imediatamente) */
-        #target-site {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-            z-index: 1;
-        }
-
-        /* CAMADA 2: MÁSCARA DE RETENÇÃO (Fica na frente) */
-        #overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.88); /* Fundo escuro */
-            z-index: 10;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            color: #fff;
-            backdrop-filter: blur(8px); /* Efeito vidro fosco */
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
-
-        #timer-box {
-            background: #fff;
-            color: #333;
+        .card {
+            background: #ffffff;
             padding: 30px;
-            border-radius: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             text-align: center;
-            box-shadow: 0 0 50px rgba(255, 59, 48, 0.4);
-            max-width: 90%;
-            width: 350px;
+            max-width: 380px;
+            width: 90%;
         }
-
-        #timer-display {
-            font-size: 64px;
-            font-weight: 800;
-            color: #ff3b30;
-            line-height: 1;
-            margin-bottom: 15px;
+        h2 {
+            color: #333;
+            margin-top: 0;
+            font-size: 20px;
+            margin-bottom: 8px;
         }
-
-        #message {
-            font-size: 16px;
-            color: #555;
-            line-height: 1.4;
-            font-weight: 500;
+        p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 24px;
         }
-
-        .warning-icon {
-            font-size: 24px;
-            color: #ff3b30;
-            margin-bottom: 10px;
+        .btn {
             display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #cbd5e1; /* Cinza desativado */
+            color: #64748b;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: not-allowed;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-sizing: border-box;
+            outline: none;
         }
+        /* Estado Ativo */
+        .btn.active {
+            background-color: #28a745; /* Verde */
+            color: #ffffff;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            animation: pulse 2s infinite;
+        }
+        .btn.active:hover {
+            background-color: #218838;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <!-- 1. IFRAME OCULTO (Carrega a notícia nos bastidores) -->
-    <iframe id="target-site" src=""></iframe>
+<div class="card">
+    <div id="loader" class="loader"></div>
+    <h2>Verificação de Segurança</h2>
+    <p>Estamos analisando seu tráfego para garantir a qualidade do conteúdo. Por favor, aguarde a liberação automática.</p>
+    
+    <!-- O link reale está no href, mas o clique é bloqueado pelo JS até o tempo acabar -->
+    <a href="https://www.profitablecpmratenetwork.com/jyqz786c?key=3b0b72175da55db44761deb9d41ef070" id="actionBtn" class="btn" aria-disabled="true">
+        Aguarde <span id="timer">8</span>s...
+    </a>
+    
+    <p style="font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 0;">
+        Não feche esta janela.
+    </p>
+</div>
 
-    <!-- 2. TELA DE BLOQUEIO -->
-    <div id="overlay">
-        <div id="timer-box">
-            <span class="warning-icon">⚠️ Aguarde</span>
-            <div id="timer-display">20</div>
-            <div id="message">
-                Carregando mídia segura...<br>
-                Não feche esta janela ou o conteúdo será perdido.
-            </div>
-        </div>
-    </div>
+<script>
+    (function() {
+        // CONFIGURAÇÃO
+        const WAIT_SECONDS = 8; // Tempo de espera
+        const TARGET_URL = document.getElementById('actionBtn').href;
 
-    <script>
-        // --- CONFIGURAÇÃO ---
-        const URL_DESTINO = "https://verdadeiranatureza.com/2026/04/09/novo-affair-ana-castela-e-vista-com-ex-de-famosa-influenciadora-veja/?utm_campaign=1891&utm_medium=42810899&utm_term=1503&utm_source=98323c3a64ed5";
-        const TEMPO_SEGUNDOS = 20;
-        // -------------------
+        // Elementos
+        const btn = document.getElementById('actionBtn');
+        const timerSpan = document.getElementById('timer');
+        const loader = document.getElementById('loader');
 
-        const iframe = document.getElementById('target-site');
-        const timerEl = document.getElementById('timer-display');
-        const overlay = document.getElementById('overlay');
-        let tempoRestante = TEMPO_SEGUNDOS;
-        let liberado = false;
+        // Lógica Resiliente (usa timestamp real, não depende de intervalo constante)
+        const startTime = Date.now();
+        const targetTime = startTime + (WAIT_SECONDS * 1000);
 
-        // 1. INICIA CARREGAMENTO IMEDIATO (Gera engajamento no servidor de destino)
-        iframe.src = URL_DESTINO;
+        function checkUnlock() {
+            const now = Date.now();
+            const remaining = Math.max(0, Math.ceil((targetTime - now) / 1000));
 
-        // 2. TRAVA DE SAÍDA (O "PULO DO GATO" QUE VOCÊ PEDIU)
-        // Isso força o alerta nativo do navegador ao clicar no X ou tentar fechar a aba
-        window.onbeforeunload = function(e) {
-            if (!liberado) {
-                // Navegadores modernos ignoram o texto customizado e mostram o padrão:
-                // "As alterações que você fez podem não ser salvas. Deseja sair?"
-                // Mas a função de bloquear o fechamento funciona.
-                e.preventDefault(); 
-                e.returnValue = '';
-                return '';
+            // Atualiza o texto
+            timerSpan.textContent = remaining;
+
+            if (now >= targetTime) {
+                unlockButton();
+            } else {
+                // Usa requestAnimationFrame para melhor performance em abas background
+                requestAnimationFrame(checkUnlock);
             }
-        };
+        }
 
-        // Impede teclas de atalho (F5, Back, Alt+F4 em alguns casos)
-        document.addEventListener('keydown', function(e) {
-            if (!liberado) {
-                if (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.altKey && e.key === 'ArrowLeft')) {
-                    e.preventDefault();
-                }
+        function unlockButton() {
+            // Previne execução múltipla
+            if (btn.classList.contains('active')) return;
+
+            btn.classList.add('active');
+            btn.removeAttribute('aria-disabled');
+            btn.style.cursor = 'pointer';
+            btn.innerHTML = "ACESSO LIBERADO - CLIQUE AQUI";
+            
+            loader.classList.add('hidden');
+
+            // Remove a prevenção de clique
+            btn.onclick = function(e) {
+                // Opcional: Disparar Pixel de Conversão aqui antes de sair
+                // fbq('track', 'Lead'); 
+                console.log("Usuário clicou após tempo válido.");
+                // Deixa o link seguir normalmente
+            };
+        }
+
+        // Bloqueia qualquer tentativa de clicar antes da hora (segurança extra JS)
+        btn.addEventListener('click', function(e) {
+            if (!this.classList.contains('active')) {
+                e.preventDefault();
+                e.stopPropagation();
+                // Efeito visual de erro se tentar clicar cedo
+                this.style.transform = "translateX(5px)";
+                setTimeout(() => this.style.transform = "none", 100);
+                return false;
             }
         });
 
-        // 3. CRONÔMETRO
-        const contador = setInterval(() => {
-            tempoRestante--;
-            timerEl.innerText = tempoRestante;
+        // Inicia o loop
+        requestAnimationFrame(checkUnlock);
 
-            if (tempoRestante <= 0) {
-                clearInterval(contador);
-                liberado = true; // Libera a saída
-                
-                // Remove a trava de fechamento
-                window.onbeforeunload = null;
-
-                // Remove a máscara visualmente
-                overlay.style.opacity = '0';
-                overlay.style.transition = 'opacity 0.5s ease';
-                
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                    // Força redirecionamento final para garantir que o site apareça limpo
-                    window.location.href = URL_DESTINO;
-                }, 500);
+        // Fallback de emergência: Se o navegador congelar o script por muito tempo,
+        // força o desbloqueio após um tempo máximo de segurança (Wait + 3s)
+        setTimeout(() => {
+            if (!btn.classList.contains('active')) {
+                console.log("Fallback ativado: Script possivelmente pausado.");
+                unlockButton();
             }
-        }, 1000);
-    </script>
+        }, (WAIT_SECONDS + 3) * 1000);
+
+    })();
+</script>
+
 </body>
 </html>
 
