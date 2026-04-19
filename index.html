@@ -1,184 +1,69 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verificação de Segurança</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .card {
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            text-align: center;
-            max-width: 380px;
-            width: 90%;
-        }
-        h2 {
-            color: #333;
-            margin-top: 0;
-            font-size: 20px;
-            margin-bottom: 8px;
-        }
-        p {
-            color: #666;
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 24px;
-        }
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            background-color: #cbd5e1; /* Cinza desativado */
-            color: #64748b;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: not-allowed;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            box-sizing: border-box;
-            outline: none;
-        }
-        /* Estado Ativo */
-        .btn.active {
-            background-color: #28a745; /* Verde */
-            color: #ffffff;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-            animation: pulse 2s infinite;
-        }
-        .btn.active:hover {
-            background-color: #218838;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
-        .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #007bff;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .hidden { display: none; }
-    </style>
+  <meta charset="utf-8">
+  <title>Redirecionamento 20 s</title>
+  <style>
+    html,body{margin:0;height:100%;overflow:hidden;background:#000}
+    iframe{width:100%;height:100%;border:none}
+    #ov{position:fixed;left:0;top:0;width:100vw;height:100vh;background:#000 url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjMTExIi8+PC9zdmc+) repeat;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;font:24px/1.2 sans-serif;user-select:none}
+    #cnt{font-size:80px;font-weight:700;color:#0ff;text-shadow:0 0 10px #0ff}
+    #ov.blink{animation:blink .3s infinite}
+    @keyframes blink{50%{opacity:.3}}
+  </style>
 </head>
+
 <body>
+  <!-- conteúdo que será liberado após 20 s -->
+  <iframe id="frm" src="https://www.profitablecpmratenetwork.com/jyqz786c?key=3b0b72175da55db44761deb9d41ef070"></iframe>
 
-<div class="card">
-    <div id="loader" class="loader"></div>
-    <h2>Verificação de Segurança</h2>
-    <p>Estamos analisando seu tráfego para garantir a qualidade do conteúdo. Por favor, aguarde a liberação automática.</p>
-    
-    <!-- O link reale está no href, mas o clique é bloqueado pelo JS até o tempo acabar -->
-    <a href="https://www.profitablecpmratenetwork.com/jyqz786c?key=3b0b72175da55db44761deb9d41ef070" id="actionBtn" class="btn" aria-disabled="true">
-        Aguarde <span id="timer">8</span>s...
-    </a>
-    
-    <p style="font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 0;">
-        Não feche esta janela.
-    </p>
-</div>
+  <div id="ov">
+    <h3>AGUARDE 20 s → SEU LINK EXCLUSIVO</h3>
+    <div id="cnt">20</div>
+    <div id="msg">Não saia: você perderá a recompensa.</div>
+  </div>
 
-<script>
-    (function() {
-        // CONFIGURAÇÃO
-        const WAIT_SECONDS = 8; // Tempo de espera
-        const TARGET_URL = document.getElementById('actionBtn').href;
+  <script>
+    /* evita sair com F5 ou swipe */
+    let blk = 1;
+    window.onbeforeunload = () => blk && 'Timer ativo: sair cancela o prêmio';
 
-        // Elementos
-        const btn = document.getElementById('actionBtn');
-        const timerSpan = document.getElementById('timer');
-        const loader = document.getElementById('loader');
+    /* bloqueia scroll, swipe, menu context */
+    ['touchmove','wheel','contextmenu'].forEach(e =>
+      document.addEventListener(e, ev => ev.preventDefault(), {passive:false}));
 
-        // Lógica Resiliente (usa timestamp real, não depende de intervalo constante)
-        const startTime = Date.now();
-        const targetTime = startTime + (WAIT_SECONDS * 1000);
+    /* contador regressivo */
+    let n = 20, el = document.getElementById("cnt"), ov = document.getElementById("ov");
+    const t = setInterval(() => {
+      if (n > 0) {
+        el.textContent = --n;
+        if (n <= 3) ov.classList.add('blink');
+      }
+    }, 1000);
 
-        function checkUnlock() {
-            const now = Date.now();
-            const remaining = Math.max(0, Math.ceil((targetTime - now) / 1000));
+    /* envia ping aos 10 s */
+    setTimeout(() => {
+      const cid = new URLSearchParams(location.search).get("cid");
+      if (cid) fetch("https://seudominio.com/ping.php?cid="+encodeURIComponent(cid));
+    }, 10_000);
 
-            // Atualiza o texto
-            timerSpan.textContent = remaining;
-
-            if (now >= targetTime) {
-                unlockButton();
-            } else {
-                // Usa requestAnimationFrame para melhor performance em abas background
-                requestAnimationFrame(checkUnlock);
-            }
-        }
-
-        function unlockButton() {
-            // Previne execução múltipla
-            if (btn.classList.contains('active')) return;
-
-            btn.classList.add('active');
-            btn.removeAttribute('aria-disabled');
-            btn.style.cursor = 'pointer';
-            btn.innerHTML = "ACESSO LIBERADO - CLIQUE AQUI";
-            
-            loader.classList.add('hidden');
-
-            // Remove a prevenção de clique
-            btn.onclick = function(e) {
-                // Opcional: Disparar Pixel de Conversão aqui antes de sair
-                // fbq('track', 'Lead'); 
-                console.log("Usuário clicou após tempo válido.");
-                // Deixa o link seguir normalmente
-            };
-        }
-
-        // Bloqueia qualquer tentativa de clicar antes da hora (segurança extra JS)
-        btn.addEventListener('click', function(e) {
-            if (!this.classList.contains('active')) {
-                e.preventDefault();
-                e.stopPropagation();
-                // Efeito visual de erro se tentar clicar cedo
-                this.style.transform = "translateX(5px)";
-                setTimeout(() => this.style.transform = "none", 100);
-                return false;
-            }
-        });
-
-        // Inicia o loop
-        requestAnimationFrame(checkUnlock);
-
-        // Fallback de emergência: Se o navegador congelar o script por muito tempo,
-        // força o desbloqueio após um tempo máximo de segurança (Wait + 3s)
-        setTimeout(() => {
-            if (!btn.classList.contains('active')) {
-                console.log("Fallback ativado: Script possivelmente pausado.");
-                unlockButton();
-            }
-        }, (WAIT_SECONDS + 3) * 1000);
-
-    })();
-</script>
-
+    /* libera tela e pixels aos 20 s */
+    setTimeout(() => {
+      blk = 0;                 // libera F5
+      clearInterval(t);
+      ov.remove();
+      frm.style.display = 'block';
+      if(typeof fbq === "function") fbq("track","PageView");
+      new Image().src = "https://www.mi-malist.com/pixel.gif?t="+Date.now();
+    }, 20_000);
+  </script>
 </body>
 </html>
+
+
+
+
+
 
 
 
