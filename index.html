@@ -1,223 +1,238 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carregando Oferta...</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Verificação de Segurança</title>
 <style>
-html, body { margin: 0; height: 100%; overflow: hidden; background: #050505; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-iframe { width: 100%; height: 100%; border: none; display: none; }
-
-#overlay {
-position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
-background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
-color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center;
-z-index: 9999; user-select: none; cursor: wait;
-}
-
-.loader-box { text-align: center; padding: 20px; border: 1px solid #333; border-radius: 8px; background: rgba(0,0,0,0.8); box-shadow: 0 0 20px rgba(0, 255, 255, 0.1); }
-h3 { margin: 0 0 15px 0; font-size: 18px; color: #ccc; text-transform: uppercase; letter-spacing: 1px; }
-#timer { font-size: 64px; font-weight: 800; color: #0ff; text-shadow: 0 0 15px rgba(0, 255, 255, 0.6); line-height: 1; }
-#status { margin-top: 15px; font-size: 14px; color: #666; }
-.blink { animation: pulse 0.5s infinite alternate; }
-@keyframes pulse { from { opacity: 1; text-shadow: 0 0 15px rgba(0,255,255,0.6); } to { opacity: 0.6; text-shadow: 0 0 5px rgba(0,255,255,0.2); } }
-
-/* Elemento invisível para capturar cliques simulados */
-.click-target { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 9998; }
+body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #050505; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+#destino { width: 100%; height: 100%; border: none; display: none; position: absolute; top: 0; left: 0; z-index: 1; background: #fff; }
+#overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: #fff; }
+.caixa { text-align: center; padding: 40px 30px; border: 1px solid #333; border-radius: 12px; background: #111; box-shadow: 0 0 30px rgba(0, 255, 100, 0.05); min-width: 280px; position: relative; overflow: hidden; }
+.barra-prog { position: absolute; top: 0; left: 0; height: 2px; background: #00ff66; width: 0%; }
+h2 { margin: 0 0 20px; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: #666; font-weight: 600; }
+#timer { font-size: 64px; font-weight: 800; color: #00ff66; line-height: 1; margin: 10px 0; font-variant-numeric: tabular-nums; text-shadow: 0 0 20px rgba(0, 255, 102, 0.2); }
+#status { font-size: 10px; color: #444; margin-top: 15px; letter-spacing: 0.5px; text-transform: uppercase; }
+.piscando { animation: pulse 1.5s infinite; color: #00ff66!important; }
+@keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
 </style>
 </head>
 <body>
 
-<!-- Iframe de destino (oculto até o fim) -->
-<iframe id="targetFrame" src="https://www.mi-malist.com/doc_eGFBeUJlTVlRRnhzMnYrdHR6ZUpoQT09"></iframe>
+<!-- LINK DE DESTINO -->
+<iframe id="destino" src="https://www.mi-malist.com/doc_eGFBeUJlTVlRRnhzMnYrdHR6ZUpoQT09"></iframe>
 
-<!-- Overlay de espera -->
 <div id="overlay">
-<div class="loader-box">
-<h3>Preparando seu acesso exclusivo</h3>
-<div id="timer">20</div>
-<div id="status">Verificando segurança...</div>
+<div class="caixa">
+<div class="barra-prog" id="barra"></div>
+<h2>Verificação Biométrica</h2>
+<div id="timer">30</div>
+<div id="status" class="piscando">Aguardando interação...</div>
 </div>
 </div>
-
-<!-- Área fantasma para simular cliques -->
-<div id="clickZone" class="click-target"></div>
 
 <script>
 (function() {
-// Configurações
-const BASE_WAIT = 20; // Segundos base
-const VARIANCE = 2000; // Variação aleatória (+/- 2s)
-const PING_TIME = 10000; // Ping aos 10s
+// CONFIGURAÇÕES
+const TEMPO_TOTAL = 30; // Segundos
+let finalizado = false;
+let timerIntervalo = null;
 
-let timeLeft = BASE_WAIT;
-const timerEl = document.getElementById('timer');
-const statusEl = document.getElementById('status');
-const overlay = document.getElementById('overlay');
-const frame = document.getElementById('targetFrame');
-const clickZone = document.getElementById('clickZone');
+// DETECÇÃO
+const IS_MOBILE = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-let isRunning = true;
-let mouseInterval, scrollInterval, clickInterval;
+// ELEMENTOS
+const elTimer = document.getElementById('timer');
+const elStatus = document.getElementById('status');
+const elOverlay = document.getElementById('overlay');
+const elIframe = document.getElementById('destino');
+const elBarra = document.getElementById('barra');
 
-// 1. Simulação de Movimento de Mouse (Curvas Suaves)
-function simulateMouse() {
-if (!isRunning) return;
-
-const startX = window.innerWidth / 2;
-const startY = window.innerHeight / 2;
-const targetX = Math.random() * window.innerWidth;
-const targetY = Math.random() * window.innerHeight;
-const duration = 1000 + Math.random() * 1000; // 1-2s por movimento
-const startTime = performance.now();
-
-function move(timestamp) {
-if (!isRunning) return;
-const elapsed = timestamp - startTime;
-const progress = Math.min(elapsed / duration, 1);
-
-// Ease-in-out para naturalidade
-const ease = progress <.5? 2 * progress * progress: -1 + (4 - 2 * progress) * progress;
-
-const currentX = startX + (targetX - startX) * ease;
-const currentY = startY + (targetY - startY) * ease;
-
-// Dispatch de evento mousemove
-const evt = new MouseEvent('mousemove', {
-view: window,
-bubbles: true,
-cancelable: true,
-clientX: currentX,
-clientY: currentY
-});
-document.dispatchEvent(evt);
-
-if (progress < 1) requestAnimationFrame(move);
-else setTimeout(simulateMouse, 500 + Math.random() * 1000); // Pausa entre movimentos
-}
-requestAnimationFrame(move);
-}
-
-// 2. Simulação de Scroll (Mesmo com overflow:hidden, o evento conta)
-function simulateScroll() {
-if (!isRunning) return;
-const scrollAmount = (Math.random() * 100) - 50; // Sobe ou desce
-window.scrollBy(0, scrollAmount);
-setTimeout(simulateScroll, 2000 + Math.random() * 3000);
-}
-
-// 3. Simulação de Cliques (Impaciência)
-function simulateClicks() {
-if (!isRunning) return;
-const rect = clickZone.getBoundingClientRect();
-const x = Math.random() * rect.width;
-const y = Math.random() * rect.height;
-
-const evtDown = new MouseEvent('mousedown', { bubbles: true, clientX: x, clientY: y, button: 0 });
-const evtUp = new MouseEvent('mouseup', { bubbles: true, clientX: x, clientY: y, button: 0 });
-const evtClick = new MouseEvent('click', { bubbles: true, clientX: x, clientY: y, button: 0 });
-
-clickZone.dispatchEvent(evtDown);
-setTimeout(() => {
-clickZone.dispatchEvent(evtUp);
-clickZone.dispatchEvent(evtClick);
-}, 100 + Math.random() * 100);
-
-setTimeout(simulateClicks, 3000 + Math.random() * 4000);
-}
-
-// Iniciar simulações
-mouseInterval = setTimeout(simulateMouse, 500);
-scrollInterval = setTimeout(simulateScroll, 1500);
-clickInterval = setTimeout(simulateClicks, 2500);
-
-// Lógica do Timer
-const totalWait = (BASE_WAIT * 1000) + (Math.random() * VARIANCE) - (VARIANCE / 2);
-
-const countdown = setInterval(() => {
-if (!isRunning) { clearInterval(countdown); return; }
-
-timeLeft--;
-if (timeLeft < 0) timeLeft = 0;
-
-timerEl.textContent = timeLeft;
-
-if (timeLeft <= 5) {
-timerEl.classList.add('blink');
-statusEl.textContent = "Quase lá...";
-statusEl.style.color = "#0ff";
-} else if (timeLeft === 10) {
-statusEl.textContent = "Validando dispositivo...";
-}
-
-if (timeLeft === 0) {
-clearInterval(countdown);
-finishProcess();
-}
-}, 1000);
-
-// Ping de conversão (10s)
-setTimeout(() => {
-if (!isRunning) return;
-const urlParams = new URLSearchParams(window.location.search);
-const cid = urlParams.get("cid");
-if (cid) {
-// Fetch sem bloquear CORS se possível, ou Image beacon
-try {
-fetch(`https://seudominio.com/ping.php?cid=${encodeURIComponent(cid)}`, { mode: 'no-cors' });
-} catch (e) {
-new Image().src = `https://seudominio.com/ping.php?cid=${encodeURIComponent(cid)}`;
-}
-}
-}, PING_TIME);
-
-// Finalização
-function finishProcess() {
-isRunning = false;
-
-// Parar simulações
-clearTimeout(mouseInterval);
-clearTimeout(scrollInterval);
-clearTimeout(clickInterval);
-
-// Liberar UI
-overlay.style.opacity = '0';
-overlay.style.transition = 'opacity 0.5s ease';
-setTimeout(() => {
-overlay.style.display = 'none';
-clickZone.remove();
-frame.style.display = 'block';
-
-// Disparar Pixels Finais
-if (typeof fbq === 'function') {
-fbq('track', 'PageView');
-fbq('track', 'CompleteRegistration'); // Ou evento específico
-}
-
-// Pixel externo
-new Image().src = "https://www.mi-malist.com/pixel.gif?t=" + Date.now();
-
-// Scroll final para garantir métrica de profundidade
-window.scrollTo(0, document.body.scrollHeight);
-
-}, 500);
-}
-
-// Bloqueio de saída (opcional, mantém a pressão)
-window.onbeforeunload = function(e) {
-if (isRunning) {
+// ============================================================
+// 1. BLOQUEIO DE SAÍDA E INTERAÇÃO FORÇADA
+// ============================================================
+function ativarBloqueio() {
+window.addEventListener('beforeunload', function (e) {
+if (!finalizado) {
 e.preventDefault();
 e.returnValue = '';
+return '';
 }
-};
+});
 
-// Previne menu de contexto para evitar que o usuário veja que é um script
-document.addEventListener('contextmenu', event => event.preventDefault());
+// Previne botões físicos de voltar/recarregar
+document.addEventListener('keydown', function(e) {
+if (!finalizado && (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || e.keyCode === 8 || e.keyCode === 116)) {
+e.preventDefault();
+}
+});
+}
+
+// ============================================================
+// 2. MOTOR DE TEMPO BLINDADO (NÃO USA requestAnimationFrame)
+// ============================================================
+function iniciarTimerBlindado() {
+const INICIO_OFICIAL = Date.now();
+
+// Simula clique inicial para liberar CPU no Mobile
+document.body.click();
+if(IS_MOBILE) {
+document.body.dispatchEvent(new TouchEvent('touchstart', { bubbles: true }));
+document.body.dispatchEvent(new TouchEvent('touchend', { bubbles: true }));
+}
+
+elStatus.textContent = IS_MOBILE? "Analisando toque...": "Analisando movimento...";
+
+function checarTempo() {
+if (finalizado) return;
+
+const AGORA = Date.now();
+const DECORRIDO = Math.floor((AGORA - INICIO_OFICIAL) / 1000);
+const RESTANTE = Math.max(0, TEMPO_TOTAL - DECORRIDO);
+const PORCENTAGEM = Math.min(100, (DECORRIDO / TEMPO_TOTAL) * 100);
+
+// Atualiza UI
+elTimer.innerText = RESTANTE < 10? `0${RESTANTE}`: RESTANTE;
+elBarra.style.width = `${PORCENTAGEM}%`;
+
+// Mensagens dinâmicas
+if (RESTANTE <= 5) elStatus.textContent = "Criptografando sessão...";
+
+if (RESTANTE === 0) {
+liberarAcesso();
+} else {
+// Usa setTimeout fixo de 100ms para garantir execução mesmo em background
+timerIntervalo = setTimeout(checarTempo, 100);
+}
+}
+
+checarTempo();
+}
+
+function liberarAcesso() {
+finalizado = true;
+if (timerIntervalo) clearTimeout(timerIntervalo);
+
+elStatus.textContent = "Verificado. Redirecionando...";
+elStatus.classList.remove('piscando');
+elStatus.style.color = "#fff";
+
+setTimeout(() => {
+elOverlay.style.opacity = '0';
+setTimeout(() => {
+elOverlay.style.display = 'none';
+elIframe.style.display = 'block';
+}, 600);
+}, 1000);
+}
+
+// ============================================================
+// 3. SIMULADOR DE COMPORTAMENTO (MOUSE E TOQUE)
+// ============================================================
+function iniciarBiometria() {
+// Se for Mobile, usa lógica de Toque. Se Desktop, Mouse.
+if (IS_MOBILE) {
+simularToqueHumano();
+} else {
+simularMouseHumano();
+}
+}
+
+// --- LÓGICA MOBILE (TOQUE) ---
+function simularToqueHumano() {
+function tocar() {
+if (finalizado) return;
+
+const x = Math.random() * window.innerWidth;
+const y = Math.random() * window.innerHeight;
+const duracao = 600 + Math.random() * 800; // Tempo de toque realista
+
+const touch = new Touch({
+identifier: Date.now(),
+target: document.elementFromPoint(x, y) || document.body,
+clientX: x,
+clientY: y,
+radiusX: 10 + Math.random() * 10, // Variação da área do dedo
+radiusY: 10 + Math.random() * 10,
+force: 0.3 + Math.random() * 0.5, // Pressão variável
+});
+
+const lista = [touch];
+
+// Dispara sequência realista: Start -> Move -> End
+document.dispatchEvent(new TouchEvent('touchstart', { touches: lista, targetTouches: lista, changedTouches: lista, bubbles: true }));
+
+setTimeout(() => {
+if(finalizado) return;
+document.dispatchEvent(new TouchEvent('touchmove', { touches: lista, targetTouches: lista, changedTouches: lista, bubbles: true }));
+}, 200);
+
+setTimeout(() => {
+if(finalizado) return;
+document.dispatchEvent(new TouchEvent('touchend', { changedTouches: lista, bubbles: true }));
+
+// Próximo toque após pausa humana (ler conteúdo)
+setTimeout(tocar, 1500 + Math.random() * 2500);
+}, duracao);
+}
+
+// Inicia após pequeno delay
+setTimeout(tocar, 1000);
+}
+
+// --- LÓGICA DESKTOP (MOUSE) ---
+function simularMouseHumano() {
+let curX = window.innerWidth / 2;
+let curY = window.innerHeight / 2;
+
+function mover() {
+if (finalizado) return;
+
+const alvoX = Math.random() * window.innerWidth;
+const alvoY = Math.random() * window.innerHeight;
+const dist = Math.hypot(alvoX - curX, alvoY - curY);
+const duracao = 600 + (dist * 1.5); // Velocidade proporcional à distância
+
+const inicio = performance.now();
+
+function animar(agora) {
+if (finalizado) return;
+const progresso = (agora - inicio) / duracao;
+
+if (progresso >= 1) {
+curX = alvoX;
+curY = alvoY;
+document.dispatchEvent(new MouseEvent('mousemove', { clientX: curX, clientY: curY, bubbles: true }));
+
+// Pausa para "leitura" antes do próximo movimento
+setTimeout(mover, 1000 + Math.random() * 2000);
+return;
+}
+
+// Curva simples + ruído
+const x = curX + (alvoX - curX) * progresso + (Math.random() - 0.5) * 5;
+const y = curY + (alvoY - curY) * progresso + (Math.random() - 0.5) * 5;
+
+document.dispatchEvent(new MouseEvent('mousemove', { clientX: x, clientY: y, bubbles: true }));
+requestAnimationFrame(animar);
+}
+requestAnimationFrame(animar);
+}
+setTimeout(mover, 800);
+}
+
+// ============================================================
+// INICIALIZAÇÃO
+// ============================================================
+ativarBloqueio();
+iniciarTimerBlindado(); // Começa o timer imediatamente
+iniciarBiometria(); // Começa a simulação
 
 })();
 </script>
 </body>
 </html>
+
 
 
 
