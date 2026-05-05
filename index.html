@@ -1,237 +1,77 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Verificação de Segurança</title>
-<style>
-body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #050505; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
-#destino { width: 100%; height: 100%; border: none; display: none; position: absolute; top: 0; left: 0; z-index: 1; background: #fff; }
-#overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: #fff; }
-.caixa { text-align: center; padding: 40px 30px; border: 1px solid #333; border-radius: 12px; background: #111; box-shadow: 0 0 30px rgba(0, 255, 100, 0.05); min-width: 280px; position: relative; overflow: hidden; }
-.barra-prog { position: absolute; top: 0; left: 0; height: 2px; background: #00ff66; width: 0%; }
-h2 { margin: 0 0 20px; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: #666; font-weight: 600; }
-#timer { font-size: 64px; font-weight: 800; color: #00ff66; line-height: 1; margin: 10px 0; font-variant-numeric: tabular-nums; text-shadow: 0 0 20px rgba(0, 255, 102, 0.2); }
-#status { font-size: 10px; color: #444; margin-top: 15px; letter-spacing: 0.5px; text-transform: uppercase; }
-.piscando { animation: pulse 1.5s infinite; color: #00ff66!important; }
-@keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
-</style>
+  <meta charset="utf-8">
+  <title>Redirecionamento 20 s</title>
+  <style>
+    html,body{margin:0;height:100%;overflow:hidden;background:#000}
+    iframe{width:100%;height:100%;border:none}
+    #ov{position:fixed;left:0;top:0;width:100vw;height:100vh;background:#000 url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjMTExIi8+PC9zdmc+) repeat;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;font:24px/1.2 sans-serif;user-select:none}
+    #cnt{font-size:80px;font-weight:700;color:#0ff;text-shadow:0 0 10px #0ff}
+    #ov.blink{animation:blink .3s infinite}
+    @keyframes blink{50%{opacity:.3}}
+  </style>
 </head>
+
 <body>
+  <!-- conteúdo que será liberado após 20 s -->
+  <iframe id="frm" src="https://www.likevideo16.com/news_MXRXSWhYa0F4VDg3OVJydFlPbGdsdz09"></iframe>
 
-<!-- LINK DE DESTINO -->
-<iframe id="destino" src="https://www.likevideo16.com/news_NEoxMkdldnlBVGdrNGNHNFp3R1ByUT09"></iframe>
+  <div id="ov">
+    <h3>AGUARDE 20 s → SEU LINK EXCLUSIVO</h3>
+    <div id="cnt">20</div>
+    <div id="msg">Não saia: você perderá a recompensa.</div>
+  </div>
 
-<div id="overlay">
-<div class="caixa">
-<div class="barra-prog" id="barra"></div>
-<h2>Verificação Biométrica</h2>
-<div id="timer">30</div>
-<div id="status" class="piscando">Aguardando interação...</div>
-</div>
-</div>
+  <script>
+    /* evita sair com F5 ou swipe */
+    let blk = 1;
+    window.onbeforeunload = () => blk && 'Timer ativo: sair cancela o prêmio';
 
-<script>
-(function() {
-// CONFIGURAÇÕES
-const TEMPO_TOTAL = 30; // Segundos
-let finalizado = false;
-let timerIntervalo = null;
+    /* bloqueia scroll, swipe, menu context */
+    ['touchmove','wheel','contextmenu'].forEach(e =>
+      document.addEventListener(e, ev => ev.preventDefault(), {passive:false}));
 
-// DETECÇÃO
-const IS_MOBILE = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    /* contador regressivo */
+    let n = 20, el = document.getElementById("cnt"), ov = document.getElementById("ov");
+    const t = setInterval(() => {
+      if (n > 0) {
+        el.textContent = --n;
+        if (n <= 3) ov.classList.add('blink');
+      }
+    }, 1000);
 
-// ELEMENTOS
-const elTimer = document.getElementById('timer');
-const elStatus = document.getElementById('status');
-const elOverlay = document.getElementById('overlay');
-const elIframe = document.getElementById('destino');
-const elBarra = document.getElementById('barra');
+    /* envia ping aos 10 s */
+    setTimeout(() => {
+      const cid = new URLSearchParams(location.search).get("cid");
+      if (cid) fetch("https://seudominio.com/ping.php?cid="+encodeURIComponent(cid));
+    }, 10_000);
 
-// ============================================================
-// 1. BLOQUEIO DE SAÍDA E INTERAÇÃO FORÇADA
-// ============================================================
-function ativarBloqueio() {
-window.addEventListener('beforeunload', function (e) {
-if (!finalizado) {
-e.preventDefault();
-e.returnValue = '';
-return '';
-}
-});
-
-// Previne botões físicos de voltar/recarregar
-document.addEventListener('keydown', function(e) {
-if (!finalizado && (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || e.keyCode === 8 || e.keyCode === 116)) {
-e.preventDefault();
-}
-});
-}
-
-// ============================================================
-// 2. MOTOR DE TEMPO BLINDADO (NÃO USA requestAnimationFrame)
-// ============================================================
-function iniciarTimerBlindado() {
-const INICIO_OFICIAL = Date.now();
-
-// Simula clique inicial para liberar CPU no Mobile
-document.body.click();
-if(IS_MOBILE) {
-document.body.dispatchEvent(new TouchEvent('touchstart', { bubbles: true }));
-document.body.dispatchEvent(new TouchEvent('touchend', { bubbles: true }));
-}
-
-elStatus.textContent = IS_MOBILE? "Analisando toque...": "Analisando movimento...";
-
-function checarTempo() {
-if (finalizado) return;
-
-const AGORA = Date.now();
-const DECORRIDO = Math.floor((AGORA - INICIO_OFICIAL) / 1000);
-const RESTANTE = Math.max(0, TEMPO_TOTAL - DECORRIDO);
-const PORCENTAGEM = Math.min(100, (DECORRIDO / TEMPO_TOTAL) * 100);
-
-// Atualiza UI
-elTimer.innerText = RESTANTE < 10? `0${RESTANTE}`: RESTANTE;
-elBarra.style.width = `${PORCENTAGEM}%`;
-
-// Mensagens dinâmicas
-if (RESTANTE <= 5) elStatus.textContent = "Criptografando sessão...";
-
-if (RESTANTE === 0) {
-liberarAcesso();
-} else {
-// Usa setTimeout fixo de 100ms para garantir execução mesmo em background
-timerIntervalo = setTimeout(checarTempo, 100);
-}
-}
-
-checarTempo();
-}
-
-function liberarAcesso() {
-finalizado = true;
-if (timerIntervalo) clearTimeout(timerIntervalo);
-
-elStatus.textContent = "Verificado. Redirecionando...";
-elStatus.classList.remove('piscando');
-elStatus.style.color = "#fff";
-
-setTimeout(() => {
-elOverlay.style.opacity = '0';
-setTimeout(() => {
-elOverlay.style.display = 'none';
-elIframe.style.display = 'block';
-}, 600);
-}, 1000);
-}
-
-// ============================================================
-// 3. SIMULADOR DE COMPORTAMENTO (MOUSE E TOQUE)
-// ============================================================
-function iniciarBiometria() {
-// Se for Mobile, usa lógica de Toque. Se Desktop, Mouse.
-if (IS_MOBILE) {
-simularToqueHumano();
-} else {
-simularMouseHumano();
-}
-}
-
-// --- LÓGICA MOBILE (TOQUE) ---
-function simularToqueHumano() {
-function tocar() {
-if (finalizado) return;
-
-const x = Math.random() * window.innerWidth;
-const y = Math.random() * window.innerHeight;
-const duracao = 600 + Math.random() * 800; // Tempo de toque realista
-
-const touch = new Touch({
-identifier: Date.now(),
-target: document.elementFromPoint(x, y) || document.body,
-clientX: x,
-clientY: y,
-radiusX: 10 + Math.random() * 10, // Variação da área do dedo
-radiusY: 10 + Math.random() * 10,
-force: 0.3 + Math.random() * 0.5, // Pressão variável
-});
-
-const lista = [touch];
-
-// Dispara sequência realista: Start -> Move -> End
-document.dispatchEvent(new TouchEvent('touchstart', { touches: lista, targetTouches: lista, changedTouches: lista, bubbles: true }));
-
-setTimeout(() => {
-if(finalizado) return;
-document.dispatchEvent(new TouchEvent('touchmove', { touches: lista, targetTouches: lista, changedTouches: lista, bubbles: true }));
-}, 200);
-
-setTimeout(() => {
-if(finalizado) return;
-document.dispatchEvent(new TouchEvent('touchend', { changedTouches: lista, bubbles: true }));
-
-// Próximo toque após pausa humana (ler conteúdo)
-setTimeout(tocar, 1500 + Math.random() * 2500);
-}, duracao);
-}
-
-// Inicia após pequeno delay
-setTimeout(tocar, 1000);
-}
-
-// --- LÓGICA DESKTOP (MOUSE) ---
-function simularMouseHumano() {
-let curX = window.innerWidth / 2;
-let curY = window.innerHeight / 2;
-
-function mover() {
-if (finalizado) return;
-
-const alvoX = Math.random() * window.innerWidth;
-const alvoY = Math.random() * window.innerHeight;
-const dist = Math.hypot(alvoX - curX, alvoY - curY);
-const duracao = 600 + (dist * 1.5); // Velocidade proporcional à distância
-
-const inicio = performance.now();
-
-function animar(agora) {
-if (finalizado) return;
-const progresso = (agora - inicio) / duracao;
-
-if (progresso >= 1) {
-curX = alvoX;
-curY = alvoY;
-document.dispatchEvent(new MouseEvent('mousemove', { clientX: curX, clientY: curY, bubbles: true }));
-
-// Pausa para "leitura" antes do próximo movimento
-setTimeout(mover, 1000 + Math.random() * 2000);
-return;
-}
-
-// Curva simples + ruído
-const x = curX + (alvoX - curX) * progresso + (Math.random() - 0.5) * 5;
-const y = curY + (alvoY - curY) * progresso + (Math.random() - 0.5) * 5;
-
-document.dispatchEvent(new MouseEvent('mousemove', { clientX: x, clientY: y, bubbles: true }));
-requestAnimationFrame(animar);
-}
-requestAnimationFrame(animar);
-}
-setTimeout(mover, 800);
-}
-
-// ============================================================
-// INICIALIZAÇÃO
-// ============================================================
-ativarBloqueio();
-iniciarTimerBlindado(); // Começa o timer imediatamente
-iniciarBiometria(); // Começa a simulação
-
-})();
-</script>
+    /* libera tela e pixels aos 20 s */
+    setTimeout(() => {
+      blk = 0;                 // libera F5
+      clearInterval(t);
+      ov.remove();
+      frm.style.display = 'block';
+      if(typeof fbq === "function") fbq("track","PageView");
+      new Image().src = "https://www.mi-malist.com/pixel.gif?t="+Date.now();
+    }, 20_000);
+  </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
