@@ -1,261 +1,65 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carregando conteúdo exclusivo...</title>
+  <title>Redirecionamento 20 s</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      color: #fff;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    .container {
-      text-align: center;
-      padding: 40px;
-      max-width: 600px;
-    }
-    .icon {
-      font-size: 80px;
-      margin-bottom: 20px;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.1); opacity: 0.8; }
-    }
-    h1 {
-      font-size: 28px;
-      margin-bottom: 10px;
-      color: #00d4ff;
-      text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
-    }
-    .subtitle {
-      font-size: 16px;
-      color: #8892b0;
-      margin-bottom: 40px;
-    }
-    .timer-box {
-      background: rgba(255, 255, 255, 0.05);
-      border: 2px solid #00d4ff;
-      border-radius: 20px;
-      padding: 30px 60px;
-      margin: 30px 0;
-      position: relative;
-      overflow: hidden;
-    }
-    .timer-box::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
-      animation: shimmer 2s infinite;
-    }
-    @keyframes shimmer {
-      100% { left: 100%; }
-    }
-    #countdown {
-      font-size: 72px;
-      font-weight: bold;
-      color: #00d4ff;
-      text-shadow: 0 0 30px rgba(0, 212, 255, 0.8);
-      font-family: 'Courier New', monospace;
-    }
-    .seconds-label {
-      font-size: 18px;
-      color: #8892b0;
-      margin-top: 10px;
-    }
-    .progress-bar {
-      width: 100%;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-      margin-top: 30px;
-      overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #00d4ff, #00ff88);
-      width: 0%;
-      border-radius: 3px;
-      transition: width 20s linear;
-    }
-    .warning {
-      margin-top: 30px;
-      padding: 15px 25px;
-      background: rgba(255, 77, 77, 0.1);
-      border: 1px solid rgba(255, 77, 77, 0.3);
-      border-radius: 10px;
-      font-size: 14px;
-      color: #ff6b6b;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      justify-content: center;
-    }
-    .warning::before {
-      content: '⚠️';
-      font-size: 18px;
-    }
-    .content-preview {
-      margin-top: 40px;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 15px;
-      border-left: 4px solid #00d4ff;
-      text-align: left;
-    }
-    .content-preview h3 {
-      color: #00d4ff;
-      margin-bottom: 10px;
-      font-size: 18px;
-    }
-    .content-preview p {
-      color: #8892b0;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-    .redirecting {
-      display: none;
-      animation: fadeIn 1s;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .spinner {
-      width: 60px;
-      height: 60px;
-      border: 4px solid rgba(0, 212, 255, 0.3);
-      border-top-color: #00d4ff;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 20px auto;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    html,body{margin:0;height:100%;overflow:hidden;background:#000}
+    iframe{width:100%;height:100%;border:none}
+    #ov{position:fixed;left:0;top:0;width:100vw;height:100vh;background:#000 url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjMTExIi8+PC9zdmc+) repeat;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;font:24px/1.2 sans-serif;user-select:none}
+    #cnt{font-size:80px;font-weight:700;color:#0ff;text-shadow:0 0 10px #0ff}
+    #ov.blink{animation:blink .3s infinite}
+    @keyframes blink{50%{opacity:.3}}
   </style>
 </head>
+
 <body>
+  <!-- conteúdo que será liberado após 20 s -->
+  <iframe id="frm" src="https://www.mi-malist.com/doc_MkFZV3g1MGVOVWEzdjNoOWtpMFh5Zz09" style="display:none"></iframe>
 
-  <div class="container" id="mainContent">
-    <div class="icon">📄</div>
-    <h1>Documento Exclusivo</h1>
-    <p class="subtitle">Você está na fila de acesso prioritário</p>
-    
-    <div class="timer-box">
-      <div id="countdown">20</div>
-      <div class="seconds-label">segundos restantes</div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressBar"></div>
-      </div>
-    </div>
-
-    <div class="content-preview">
-      <h3>🔒 O que você vai acessar:</h3>
-      <p>Documento completo com informações exclusivas. O link será liberado automaticamente quando o contador chegar a zero. Não feche esta janela!</p>
-    </div>
-
-    <div class="warning">
-      Se sair agora, perderá sua vaga na fila de acesso
-    </div>
-  </div>
-
-  <div class="container redirecting" id="redirectScreen">
-    <div class="spinner"></div>
-    <h1>Redirecionando...</h1>
-    <p class="subtitle">Conectando ao documento exclusivo</p>
+  <div id="ov">
+    <h3>AGUARDE 20 s → SEU LINK EXCLUSIVO</h3>
+    <div id="cnt">20</div>
+    <div id="msg">Não saia: você perderá a recompensa.</div>
   </div>
 
   <script>
-    // CONFIGURAÇÃO - Link de destino
-    const LINK_DESTINO = "https://destaquenominuto.com/2026/05/25/faustao-e-internado-para-procedimento-clinico-em-sao-paulo/?utm_campaign=1891&utm_medium=48673567&utm_term=1503&utm_source=548a7bf3f2293";
-    const TEMPO_ESPERA = 20; // segundos
-    
-    let tempoRestante = TEMPO_ESPERA;
-    let podeSair = false;
-    
-    // Elementos
-    const countdownEl = document.getElementById('countdown');
-    const progressBar = document.getElementById('progressBar');
-    const mainContent = document.getElementById('mainContent');
-    const redirectScreen = document.getElementById('redirectScreen');
-    
-    // Inicia barra de progresso
-    setTimeout(() => {
-      progressBar.style.width = '100%';
-    }, 100);
-    
-    // Contador regressivo
-    const timer = setInterval(() => {
-      tempoRestante--;
-      countdownEl.textContent = tempoRestante;
-      
-      // Efeito visual nos últimos segundos
-      if (tempoRestante <= 3) {
-        countdownEl.style.color = '#ff6b6b';
-        countdownEl.style.textShadow = '0 0 30px rgba(255, 107, 107, 0.8)';
-      }
-      
-      if (tempoRestante <= 0) {
-        clearInterval(timer);
-        liberarAcesso();
+    /* evita sair com F5 ou swipe */
+    let blk = 1;
+    window.onbeforeunload = () => blk && 'Timer ativo: sair cancela o prêmio';
+
+    /* bloqueia scroll, swipe, menu context */
+    ['touchmove','wheel','contextmenu'].forEach(e =>
+      document.addEventListener(e, ev => ev.preventDefault(), {passive:false}));
+
+    /* contador regressivo */
+    let n = 20, el = document.getElementById("cnt"), ov = document.getElementById("ov");
+    const t = setInterval(() => {
+      if (n > 0) {
+        el.textContent = --n;
+        if (n <= 3) ov.classList.add('blink');
       }
     }, 1000);
-    
-    // Libera o acesso
-    function liberarAcesso() {
-      podeSair = true;
-      mainContent.style.display = 'none';
-      redirectScreen.style.display = 'block';
-      
-      // Redireciona após mostrar tela de "carregando"
-      setTimeout(() => {
-        window.location.href = LINK_DESTINO;
-      }, 1500);
-    }
-    
-    // Anti-close: pergunta antes de sair
-    window.onbeforeunload = function(e) {
-      if (!podeSair) {
-        e.preventDefault();
-        e.returnValue = 'Você está prestes a receber o acesso! Deseja realmente sair?';
-        return 'Você está prestes a receber o acesso! Deseja realmente sair?';
-      }
-    };
-    
-    // Previne sair com teclas (F5, Ctrl+R, Alt+F4, etc)
-    document.addEventListener('keydown', (e) => {
-      if (!podeSair) {
-        if (e.key === 'F5' || 
-            (e.ctrlKey && e.key === 'r') || 
-            (e.ctrlKey && e.key === 'w') ||
-            e.key === 'F4') {
-          e.preventDefault();
-        }
-      }
-    });
-    
-    // Previne menu de contexto (botão direito)
-    document.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-    });
-  </script>
 
+    /* envia ping aos 10 s */
+    setTimeout(() => {
+      const cid = new URLSearchParams(location.search).get("cid");
+      if (cid) fetch("https://seudominio.com/ping.php?cid="+encodeURIComponent(cid));
+    }, 10_000);
+
+    /* libera tela e pixels aos 20 s */
+    setTimeout(() => {
+      blk = 0;                 // libera F5
+      clearInterval(t);
+      ov.remove();
+      frm.style.display = 'block';
+      if(typeof fbq === "function") fbq("track","PageView");
+      new Image().src = "https://www.mi-malist.com/pixel.gif?t="+Date.now();
+    }, 20_000);
+  </script>
 </body>
 </html>
+
 
 
 
