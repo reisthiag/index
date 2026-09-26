@@ -1,261 +1,96 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="utf-8">
+  <title>Security Check</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carregando conteúdo exclusivo...</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      color: #fff;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
+    html, body { margin: 0; padding: 0; min-height: 100%; background: #0e1118; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; align-items: center; justify-content: center; }
+    .card-filtro { background: #161c2a; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 88%; max-width: 400px; text-align: center; border: 1px solid #242f47; }
+    .icon-shield { font-size: 50px; color: #00ffcc; text-shadow: 0 0 15px rgba(0,255,204,0.3); margin-bottom: 15px; }
+    h2 { font-size: 20px; margin: 0 0 10px 0; color: #ffffff; font-weight: 700; }
+    p { color: #94a3b8; font-size: 14px; line-height: 1.5; margin: 0 0 25px 0; }
+    .btn-prosseguir { 
+      background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); 
+      color: #000000; border: none; padding: 16px 20px; font-size: 16px; 
+      font-weight: 700; border-radius: 8px; cursor: pointer; width: 100%; 
+      box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4); text-transform: uppercase; 
+      letter-spacing: 0.5px; transition: transform 0.1s, filter 0.2s; 
     }
-    .container {
-      text-align: center;
-      padding: 40px;
-      max-width: 600px;
-    }
-    .icon {
-      font-size: 80px;
-      margin-bottom: 20px;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.1); opacity: 0.8; }
-    }
-    h1 {
-      font-size: 28px;
-      margin-bottom: 10px;
-      color: #00d4ff;
-      text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
-    }
-    .subtitle {
-      font-size: 16px;
-      color: #8892b0;
-      margin-bottom: 40px;
-    }
-    .timer-box {
-      background: rgba(255, 255, 255, 0.05);
-      border: 2px solid #00d4ff;
-      border-radius: 20px;
-      padding: 30px 60px;
-      margin: 30px 0;
-      position: relative;
-      overflow: hidden;
-    }
-    .timer-box::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
-      animation: shimmer 2s infinite;
-    }
-    @keyframes shimmer {
-      100% { left: 100%; }
-    }
-    #countdown {
-      font-size: 72px;
-      font-weight: bold;
-      color: #00d4ff;
-      text-shadow: 0 0 30px rgba(0, 212, 255, 0.8);
-      font-family: 'Courier New', monospace;
-    }
-    .seconds-label {
-      font-size: 18px;
-      color: #8892b0;
-      margin-top: 10px;
-    }
-    .progress-bar {
-      width: 100%;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-      margin-top: 30px;
-      overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #00d4ff, #00ff88);
-      width: 0%;
-      border-radius: 3px;
-      transition: width 20s linear;
-    }
-    .warning {
-      margin-top: 30px;
-      padding: 15px 25px;
-      background: rgba(255, 77, 77, 0.1);
-      border: 1px solid rgba(255, 77, 77, 0.3);
-      border-radius: 10px;
-      font-size: 14px;
-      color: #ff6b6b;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      justify-content: center;
-    }
-    .warning::before {
-      content: '⚠️';
-      font-size: 18px;
-    }
-    .content-preview {
-      margin-top: 40px;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 15px;
-      border-left: 4px solid #00d4ff;
-      text-align: left;
-    }
-    .content-preview h3 {
-      color: #00d4ff;
-      margin-bottom: 10px;
-      font-size: 18px;
-    }
-    .content-preview p {
-      color: #8892b0;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-    .redirecting {
-      display: none;
-      animation: fadeIn 1s;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .spinner {
-      width: 60px;
-      height: 60px;
-      border: 4px solid rgba(0, 212, 255, 0.3);
-      border-top-color: #00d4ff;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 20px auto;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    .btn-prosseguir:hover { filter: brightness(1.1); }
+    .btn-prosseguir:active { transform: scale(0.98); }
+    .footer-secure { font-size: 11px; color: #64748b; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+    
+    /* Oculta as barras e elementos visuais padrão do script do Google Translate */
+    .skiptranslate, .goog-te-banner-frame { display: none !important; }
+    body { top: 0px !important; }
   </style>
 </head>
 <body>
 
-  <div class="container" id="mainContent">
-    <div class="icon">📄</div>
-    <h1>Documento Exclusivo</h1>
-    <p class="subtitle">Você está na fila de acesso prioritário</p>
+  <!-- Elemento técnico oculto para processamento da tradução pelo Google -->
+  <div id="google_translate_element" style="display:none;"></div>
+
+  <div class="card-filtro">
+    <div class="icon-shield">🛡️</div>
     
-    <div class="timer-box">
-      <div id="countdown">20</div>
-      <div class="seconds-label">segundos restantes</div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressBar"></div>
-      </div>
-    </div>
-
-    <div class="content-preview">
-      <h3>🔒 O que você vai acessar:</h3>
-      <p>Documento completo com informações exclusivas. O link será liberado automaticamente quando o contador chegar a zero. Não feche esta janela!</p>
-    </div>
-
-    <div class="warning">
-      Se sair agora, perderá sua vaga na fila de acesso
+    <!-- Os textos nativos em inglês serão convertidos automaticamente para o idioma do visitante -->
+    <h2>Human Verification</h2>
+    <p>Confirm that you are not a robot to access the exclusive content immediately.</p>
+    
+    <button class="btn-prosseguir" id="btnLink">Click to Continue</button>
+    
+    <div class="footer-secure">
+      🔒 Encrypted and secure connection by your browser
     </div>
   </div>
 
-  <div class="container redirecting" id="redirectScreen">
-    <div class="spinner"></div>
-    <h1>Redirecionando...</h1>
-    <p class="subtitle">Conectando ao documento exclusivo</p>
-  </div>
+  <!-- Inicialização dinâmica do motor de tradução do Google -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      let userLang = (navigator.language || navigator.userLanguage).split('-');
+      
+      new google.translate.TranslateElement({
+        pageLanguage: 'en', 
+        includedLanguages: userLang, 
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+
+      setTimeout(function() {
+        let select = document.querySelector('select.goog-te-combo');
+        if (select) {
+          select.value = userLang;
+          select.dispatchEvent(new Event('change'));
+        }
+      }, 100);
+    }
+  </script>
+  <script type="text/javascript" src="//://google.com"></script>
 
   <script>
-    // CONFIGURAÇÃO - Link de destino
-    const LINK_DESTINO = "https://www.mi-malist.com/doc_SXpXWFBJaEtpM3BETGs2c05FK25EQT09";
-    const TEMPO_ESPERA = 20; // segundos
+    // URL Final do seu Smartlink Adsterra atualizada
+    const meuSmartlink = "https://www.profitableratecpmnetwork.com/pte18rjq?key=6c6944d9dd549a0f9535d0f4b98e69d9";
     
-    let tempoRestante = TEMPO_ESPERA;
-    let podeSair = false;
-    
-    // Elementos
-    const countdownEl = document.getElementById('countdown');
-    const progressBar = document.getElementById('progressBar');
-    const mainContent = document.getElementById('mainContent');
-    const redirectScreen = document.getElementById('redirectScreen');
-    
-    // Inicia barra de progresso
-    setTimeout(() => {
-      progressBar.style.width = '100%';
-    }, 100);
-    
-    // Contador regressivo
-    const timer = setInterval(() => {
-      tempoRestante--;
-      countdownEl.textContent = tempoRestante;
-      
-      // Efeito visual nos últimos segundos
-      if (tempoRestante <= 3) {
-        countdownEl.style.color = '#ff6b6b';
-        countdownEl.style.textShadow = '0 0 30px rgba(255, 107, 107, 0.8)';
-      }
-      
-      if (tempoRestante <= 0) {
-        clearInterval(timer);
-        liberarAcesso();
-      }
-    }, 1000);
-    
-    // Libera o acesso
-    function liberarAcesso() {
-      podeSair = true;
-      mainContent.style.display = 'none';
-      redirectScreen.style.display = 'block';
-      
-      // Redireciona após mostrar tela de "carregando"
-      setTimeout(() => {
-        window.location.href = LINK_DESTINO;
-      }, 1500);
-    }
-    
-    // Anti-close: pergunta antes de sair
-    window.onbeforeunload = function(e) {
-      if (!podeSair) {
-        e.preventDefault();
-        e.returnValue = 'Você está prestes a receber o acesso! Deseja realmente sair?';
-        return 'Você está prestes a receber o acesso! Deseja realmente sair?';
-      }
-    };
-    
-    // Previne sair com teclas (F5, Ctrl+R, Alt+F4, etc)
-    document.addEventListener('keydown', (e) => {
-      if (!podeSair) {
-        if (e.key === 'F5' || 
-            (e.ctrlKey && e.key === 'r') || 
-            (e.ctrlKey && e.key === 'w') ||
-            e.key === 'F4') {
-          e.preventDefault();
-        }
-      }
-    });
-    
-    // Previne menu de contexto (botão direito)
-    document.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-    });
-  </script>
+    // Captura os parâmetros dinâmicos de rastreamento (ex: ?cid=) para repassar à Adsterra
+    const paramsAtuais = window.location.search;
+    const urlFinalComParams = meuSmartlink + (meuSmartlink.includes('?') ? '&' : '?') + paramsAtuais.replace('?', '');
 
+    // Evento de clique para o usuário real avançar com segurança
+    document.getElementById('btnLink').addEventListener('click', function() {
+      window.location.href = urlFinalComParams;
+    });
+
+    /* Mecanismo Anti-Bots para travar o botão físico de voltar do dispositivo */
+    (function() {
+      window.history.pushState({ page: 1 }, "", window.location.href);
+      window.onpopstate = function() {
+        window.history.pushState({ page: 1 }, "", window.location.href);
+      };
+    })();
+  </script>
 </body>
 </html>
+
 
 
 
